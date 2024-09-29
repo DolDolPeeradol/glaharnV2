@@ -1,0 +1,69 @@
+/* Navbar.css */
+
+/* Navbar.css */
+.navbar-button {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .navbar-button::before {
+    content: '';
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    background-color: #FF6F61;
+    transform: translateY(-100%);
+    transition: transform 0.3s ease;
+    z-index: -1;
+  }
+  
+  .navbar-button:hover::before {
+    transform: translateY(0);
+  }
+  
+  .navbar-button:hover {
+    box-shadow: 0 0 15px rgba(255, 111, 97, 0.5), 0 0 30px rgba(255, 111, 97, 0.3);
+  }
+  
+  .navbar-button:hover {
+    text-shadow: 0 0 5px rgba(255, 111, 97, 0.5);
+  }
+  
+  .hover-effect {
+    content: '';
+    position: absolute;
+    height: 3px; /* Thickness of the underline */
+    background: #FF6F61; /* Underline color */
+    bottom: 0;
+    left: 50%;
+    width: 100%;
+    transform: translateX(-50%);
+    transition: transform 0.3s ease;
+    transform-origin: left; /* For the effect to start from left */
+    z-index: -1;
+  }
+  
+  button:hover .hover-effect {
+    transform: scaleX(1); /* Show underline on hover */
+  }
+  
+  /* Additional Animation for the AppBar */
+  .AppBar {
+    position: relative;
+    animation: slideDown 0.5s ease;
+  }
+  
+  @keyframes slideDown {
+    from {
+      transform: translateY(-100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+  
+  /* Optional: Adding a glow effect to the AppBar */
+  .AppBar {
+    box-shadow: 0 10px 15px rgba(255, 111, 97, 0.3);
+  }
+  

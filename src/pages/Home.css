@@ -1,0 +1,107 @@
+body {
+  margin: 0;
+  font-family: 'Roboto', sans-serif;
+  background: linear-gradient(135deg, #2c3e50, #34495e); /* Dark gradient background */
+  overflow: auto; /* Allow scrolling */
+}
+
+.home-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start; /* Align items at the top */
+  min-height: 100vh; /* Ensure it takes at least the full viewport height */
+  color: #ecf0f1; /* Light text color */
+  text-align: center;
+  position: relative;
+  padding: 20px; /* Add some padding */
+  overflow: hidden;
+}
+
+.home-title {
+  margin-bottom: 20px; /* Reduced margin */
+  font-size: 4rem; /* Increased font size */
+  font-weight: bold;
+  text-shadow: 2px 2px 15px rgba(0, 0, 0, 0.8), 0 0 30px rgba(255, 105, 180, 1); /* Enhanced glow effect */
+  animation: fadeIn 1s ease forwards; /* Fade in animation */
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.home-button {
+  padding: 15px 30px;
+  font-size: 1.5rem;
+  border-radius: 25px;
+  background-color: rgba(52, 152, 219, 0.9); /* Soft blue for button */
+  color: #fff; /* White text for button */
+  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.6);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.home-button:hover {
+  background-color: rgba(41, 128, 185, 1); /* Darker blue on hover */
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+}
+
+/* Glow effect for buttons */
+.home-button::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 200%;
+  height: 200%;
+  border-radius: 50%;
+  background: rgba(52, 152, 219, 0.5);
+  opacity: 0;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  transform: translate(-50%, -50%) scale(0);
+}
+
+.home-button:hover::after {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+@keyframes parallax {
+  0% { background-position: 0% 0%; }
+  100% { background-position: 100% 100%; }
+}
+
+/* Add some background animation for the entire container */
+.home-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: url('https://example.com/space-background.jpg') no-repeat center center fixed; /* Background image */
+  background-size: cover;
+  opacity: 0.2; /* Add some transparency */
+  animation: parallax 30s infinite linear; /* Animation for the background */
+  z-index: -1; /* Ensure it's behind other elements */
+}
+
+/* Additional content styles */
+.additional-content {
+  margin-top: 40px;
+  opacity: 0.8;
+}
+
+.info-text {
+  font-size: 1.2rem;
+  color: #fff; /* White text for info */
+}
