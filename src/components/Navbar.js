@@ -1,5 +1,5 @@
 import React from 'react';
-import { AppBar, Toolbar, Typography, Button } from '@mui/material';
+import { AppBar, Toolbar, Button } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import './Navbar.css'; // Importing the CSS file for styles
@@ -8,7 +8,15 @@ const Navbar = () => {
   const navigate = useNavigate();
 
   return (
-    <AppBar position="static" sx={{ mb: 4, backgroundColor: '#4A4E69', boxShadow: '0 4px 10px rgba(0,0,0,0.3)' }}>
+    <AppBar
+      position="static"
+      sx={{
+        mb: 4,
+        backgroundColor: '#4A4E69',
+        boxShadow: '0 4px 10px rgba(0,0,0,0.3)',
+        padding: { xs: '8px', sm: '16px' }, // Responsive padding
+      }}
+    >
       <Toolbar>
         <motion.div whileHover={{ scale: 1.1 }}>
           <Button
@@ -21,7 +29,8 @@ const Navbar = () => {
               textTransform: 'uppercase',
               fontWeight: '500',
               transition: '0.5s',
-              marginRight: 2, // Add margin to separate from the title
+              marginRight: { xs: 1, sm: 2 }, // Responsive margin
+              fontSize: { xs: '0.8rem', sm: '1rem' }, // Responsive font size
               '&:hover': {
                 color: '#4A4E69',
                 backgroundColor: '#F9F7F7',
@@ -46,9 +55,6 @@ const Navbar = () => {
             Home
           </Button>
         </motion.div>
-        <Typography variant="h6" sx={{ flexGrow: 1, fontWeight: 'bold', color: '#F9F7F7', letterSpacing: '1.5px' }}>
-          GlaHarn
-        </Typography>
         {['/checkbill', '/summary', '/statusdebtor'].map((path, index) => {
           const pageName = path.slice(1).charAt(0).toUpperCase() + path.slice(2);
           return (
@@ -63,6 +69,7 @@ const Navbar = () => {
                   textTransform: 'uppercase',
                   fontWeight: '500',
                   transition: '0.5s',
+                  fontSize: { xs: '0.8rem', sm: '1rem' }, // Responsive font size
                   '&:hover': {
                     color: '#4A4E69',
                     backgroundColor: '#F9F7F7',
