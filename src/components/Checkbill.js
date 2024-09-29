@@ -24,7 +24,10 @@ import Autocomplete from "@mui/material/Autocomplete";
 
 const loadFromLocalStorage = (key) => {
   const data = localStorage.getItem(key);
-  return data ? JSON.parse(data) : [];
+  const parsedData = data ? JSON.parse(data) : [];
+
+  // Ensure that parsedData is an array
+  return Array.isArray(parsedData) ? parsedData : [];
 };
 
 const saveToLocalStorage = (key, data) => {
@@ -37,7 +40,9 @@ const CheckBill = () => {
     loadFromLocalStorage("participants")
   );
   const [participantName, setParticipantName] = useState("");
-  const [foodItems, setFoodItems] = useState(loadFromLocalStorage("foodItems"));
+  const [foodItems, setFoodItems] = useState(
+    loadFromLocalStorage("foodItems") || []
+  );
   const [foodName, setFoodName] = useState("");
   const [foodPrice, setFoodPrice] = useState("");
   const [selectedParticipants, setSelectedParticipants] = useState({});
@@ -246,41 +251,50 @@ const CheckBill = () => {
     "ข้าวกะเพรา",
     "หมูสเต๊ะ",
     "ข้าวมันส้มตำ",
-];
+  ];
 
   const handleAddFoodItem = () => {
-    if (
-      foodName &&
-      foodPrice > 0 &&
-      Object.keys(selectedParticipants).length > 0
-    ) {
-      const splitPrice = (
-        parseFloat(foodPrice) / Object.keys(selectedParticipants).length
-      ).toFixed(2);
-
-      const newFoodItem = {
-        id: uuidv4(),
-        name: foodName,
-        price: parseFloat(foodPrice),
-        participants: Object.keys(selectedParticipants),
-        splitPrice,
-      };
-
-      setFoodItems([...foodItems, newFoodItem]);
-      resetFoodInputs();
-      enqueueSnackbar("Food item added!", { variant: "success" });
+    const newFoodItem = {
+      id: editingFoodId || uuidv4(), // Use existing id if editing
+      name: foodName.trim(),
+      price: parseFloat(foodPrice) || 0,
+      participants: Object.keys(selectedParticipants).filter(
+        (name) => selectedParticipants[name]
+      ),
+      splitPrice:
+        Object.keys(selectedParticipants).length > 0
+          ? (
+              parseFloat(foodPrice) / Object.keys(selectedParticipants).length
+            ).toFixed(2)
+          : 0,
+    };
+  
+    if (foodPrice) {
+      // If editing, update the food item; otherwise, add new one
+      if (editingFoodId) {
+        const updatedFoodItems = foodItems.map((food) => {
+          if (food.id === editingFoodId) {
+            return newFoodItem; // Replace the food item with the new details
+          }
+          return food; // Keep other food items unchanged
+        });
+        setFoodItems(updatedFoodItems);
+        enqueueSnackbar("Food item updated!", { variant: "success" });
+      } else {
+        setFoodItems([...foodItems, newFoodItem]); // Add new food item
+        enqueueSnackbar("Food item added!", { variant: "success" });
+      }
+      resetFoodInputs(); // Reset food inputs after adding/updating
     } else {
-      enqueueSnackbar("Please fill all fields correctly.", {
-        variant: "error",
-      });
+      enqueueSnackbar("Please enter a valid price.", { variant: "error" });
     }
   };
 
   const resetFoodInputs = () => {
-    setFoodName("");
-    setFoodPrice("");
-    setSelectedParticipants({});
-    setEditingFoodId(null);
+    setFoodName(""); // Reset foodName to empty string
+    setFoodPrice(""); // Reset foodPrice to empty string
+    setSelectedParticipants({}); // Reset selected participants
+    setEditingFoodId(null); // Clear editing ID
   };
 
   const handleEditFoodItem = (food) => {
@@ -375,7 +389,7 @@ const CheckBill = () => {
                     borderColor: "rgba(0, 0, 0, 0.5)",
                   },
                   "&.Mui-focused fieldset": {
-                    borderColor: "#FF6F61",
+                    borderColor: "purple",
                   },
                 },
               }}
@@ -432,80 +446,116 @@ const CheckBill = () => {
           <RestaurantMenuIcon /> Add Food Items
         </Typography>
         <Grid container spacing={2} alignItems="center">
-          <Grid item xs={6}>
+          <Grid item xs={8}>
             <Autocomplete
-              freeSolo
               options={exampleFoodItems}
-              value={foodName}
+              freeSolo
               onChange={(event, newValue) => setFoodName(newValue)}
               renderInput={(params) => (
-                <TextField {...params} label="Food Name" variant="outlined" />
+                <TextField
+                  {...params}
+                  label="Food Name"
+                  variant="outlined"
+                  value={foodName}
+                  onChange={(e) => setFoodName(e.target.value)}
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      "& fieldset": {
+                        borderColor: "rgba(0, 0, 0, 0.12)",
+                      },
+                      "&:hover fieldset": {
+                        borderColor: "rgba(0, 0, 0, 0.5)",
+                      },
+                      "&.Mui-focused fieldset": {
+                        borderColor: "purple",
+                      },
+                    },
+                  }}
+                />
               )}
             />
           </Grid>
-          <Grid item xs={6}>
+          <Grid item xs={4}>
             <TextField
-              label="Price (฿)"
+              label="Food Price"
               type="number"
               value={foodPrice}
               onChange={(e) => setFoodPrice(e.target.value)}
               fullWidth
-              inputProps={{ min: 0 }} // Prevent negative prices
               variant="outlined"
-            />
-          </Grid>
-        </Grid>
-        <Typography variant="subtitle1" sx={{ mt: 2 }}>
-          Select Participants to Split the Bill:
-        </Typography>
-        <Box sx={{ display: "flex", flexWrap: "wrap", mt: 1 }}>
-          {participants.map((name) => (
-            <Chip
-              key={name}
-              label={name}
-              onClick={() => handleSelectParticipant(name)}
               sx={{
-                m: 0.5,
-                backgroundColor: selectedParticipants[name]
-                  ? "#FF6F61"
-                  : "rgba(0, 0, 0, 0.12)",
-                color: selectedParticipants[name] ? "white" : "black",
-                "&:hover": {
-                  backgroundColor: selectedParticipants[name]
-                    ? "#FF4B3A"
-                    : "rgba(0, 0, 0, 0.2)",
+                "& .MuiOutlinedInput-root": {
+                  "& fieldset": {
+                    borderColor: "rgba(0, 0, 0, 0.12)",
+                  },
+                  "&:hover fieldset": {
+                    borderColor: "rgba(0, 0, 0, 0.5)",
+                  },
+                  "&.Mui-focused fieldset": {
+                    borderColor: "purple",
+                  },
                 },
               }}
             />
-          ))}
+          </Grid>
+        </Grid>
+        <Box sx={{ mt: 2 }}>
+          <Typography variant="subtitle1">Select Participants:</Typography>
+          <Grid container spacing={1}>
+            {participants.map((name) => (
+              <Grid item key={name} xs={6}>
+                <Button
+                  variant="outlined"
+                  color={selectedParticipants[name] ? "primary" : "default"}
+                  onClick={() => handleSelectParticipant(name)}
+                  fullWidth
+                  sx={{
+                    // เพิ่มสไตล์เมื่อถูกเลือก
+                    backgroundColor: selectedParticipants[name]
+                      ? "#3f51b5"
+                      : "white", // สีน้ำเงินสำหรับปุ่มที่เลือก
+                    color: selectedParticipants[name] ? "white" : "black", // เปลี่ยนสีตัวอักษร
+                    borderColor: selectedParticipants[name]
+                      ? "#3f51b5"
+                      : "#ccc", // เปลี่ยนสีขอบ
+                    "&:hover": {
+                      backgroundColor: selectedParticipants[name]
+                        ? "#303f9f"
+                        : "#f5f5f5", // สีพื้นหลังเมื่อโฮเวอร์
+                      borderColor: selectedParticipants[name]
+                        ? "#3f51b5"
+                        : "#bbb", // สีขอบเมื่อโฮเวอร์
+                    },
+                  }}
+                >
+                  {name}
+                </Button>
+              </Grid>
+            ))}
+          </Grid>
         </Box>
-        {editingFoodId ? (
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleUpdateFoodItem}
-            fullWidth
-            sx={{ mt: 2 }}
-          >
-            Update Food Item
-          </Button>
-        ) : (
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleAddFoodItem}
-            fullWidth
-            sx={{ mt: 2 }}
-          >
-            Add Food Item
-          </Button>
-        )}
+
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={handleAddFoodItem}
+          fullWidth
+          sx={{
+            mt: 2,
+            transition: "0.3s",
+            "&:hover": {
+              backgroundColor: "#FF4B3A",
+            },
+          }}
+        >
+          Add Food Item
+        </Button>
         <Button
           variant="outlined"
           color="secondary"
           onClick={handleResetFoodItems}
           fullWidth
-          sx={{ mt: 2 }}
+          sx={{ mt: 1 }}
         >
           Reset All Food Items
         </Button>
