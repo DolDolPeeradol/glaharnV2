@@ -12,6 +12,15 @@ export default function Home() {
     navigate(`/${page}`);
   };
 
+  // ฟังก์ชันสำหรับรีเซ็ตข้อมูลทั้งหมด
+  const handleResetData = () => {
+    if (window.confirm('คุณแน่ใจหรือไม่ว่าต้องการรีเซ็ตข้อมูลทั้งหมด?')) {
+      localStorage.clear();
+      alert('ข้อมูลทั้งหมดถูกรีเซ็ตแล้ว');
+      navigate('/');
+    }
+  };
+
   return (
     <Container className="home-container">
       <motion.div
@@ -42,6 +51,17 @@ export default function Home() {
           </Grid>
         ))}
       </Grid>
+      {/* ปุ่ม Reset All Data */}
+      <Box sx={{ textAlign: 'center', marginTop: 5 }}>
+        <Button 
+          variant="contained" 
+          color="error" 
+          onClick={handleResetData}
+          sx={{ marginTop: '30px', padding: '10px 20px' }}
+        >
+          Reset Data to Start Fresh
+        </Button>
+      </Box>
       <Box
         sx={{
           border: '2px solid #1976d2', // Change the border color as needed

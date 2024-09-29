@@ -254,40 +254,58 @@ const CheckBill = () => {
   ];
 
   const handleAddFoodItem = () => {
+    const price = parseFloat(foodPrice);
+    const trimmedFoodName = foodName.trim();
+
+    // ตรวจสอบว่าราคาเป็นบวก
+    if (isNaN(price) || price <= 0) {
+      enqueueSnackbar("Please enter a valid positive price.", {
+        variant: "error",
+      });
+      return;
+    }
+
+    // ตรวจสอบชื่ออาหารว่าซ้ำหรือไม่ (ยกเว้นถ้ากำลังแก้ไข)
+    if (
+      !editingFoodId &&
+      foodItems.some((food) => food.name === trimmedFoodName)
+    ) {
+      enqueueSnackbar(
+        "Food name already exists. Please enter a different name.",
+        { variant: "error" }
+      );
+      return;
+    }
+
     const newFoodItem = {
-      id: editingFoodId || uuidv4(), // Use existing id if editing
-      name: foodName.trim(),
-      price: parseFloat(foodPrice) || 0,
+      id: editingFoodId || uuidv4(), // ใช้ id เดิมถ้ากำลังแก้ไข
+      name: trimmedFoodName,
+      price: price,
       participants: Object.keys(selectedParticipants).filter(
         (name) => selectedParticipants[name]
       ),
       splitPrice:
         Object.keys(selectedParticipants).length > 0
-          ? (
-              parseFloat(foodPrice) / Object.keys(selectedParticipants).length
-            ).toFixed(2)
+          ? (price / Object.keys(selectedParticipants).length).toFixed(2)
           : 0,
     };
-  
-    if (foodPrice) {
-      // If editing, update the food item; otherwise, add new one
-      if (editingFoodId) {
-        const updatedFoodItems = foodItems.map((food) => {
-          if (food.id === editingFoodId) {
-            return newFoodItem; // Replace the food item with the new details
-          }
-          return food; // Keep other food items unchanged
-        });
-        setFoodItems(updatedFoodItems);
-        enqueueSnackbar("Food item updated!", { variant: "success" });
-      } else {
-        setFoodItems([...foodItems, newFoodItem]); // Add new food item
-        enqueueSnackbar("Food item added!", { variant: "success" });
-      }
-      resetFoodInputs(); // Reset food inputs after adding/updating
+
+    if (editingFoodId) {
+      const updatedFoodItems = foodItems.map((food) => {
+        if (food.id === editingFoodId) {
+          return newFoodItem; // แทนที่รายการอาหารที่มีอยู่ด้วยรายละเอียดใหม่
+        }
+        return food; // เก็บรายการอาหารอื่น ๆ ที่ไม่เปลี่ยนแปลง
+      });
+      setFoodItems(updatedFoodItems);
+      enqueueSnackbar("Food item updated!", { variant: "success" });
     } else {
-      enqueueSnackbar("Please enter a valid price.", { variant: "error" });
+      setFoodItems([...foodItems, newFoodItem]); // เพิ่มรายการอาหารใหม่
+      enqueueSnackbar("Food item added!", { variant: "success" });
     }
+
+    resetFoodInputs(); // รีเซ็ต input หลังจากการเพิ่มหรืออัปเดต
+    
   };
 
   const resetFoodInputs = () => {

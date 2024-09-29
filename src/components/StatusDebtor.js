@@ -62,9 +62,17 @@ export default function StatusDebtor() {
   }, []);
 
   const handlePaymentChange = (participant, amount) => {
+    const parsedAmount = parseFloat(amount);
+    
+    // ตรวจสอบให้แน่ใจว่าค่าที่ใส่เป็นบวก
+    if (parsedAmount < 0) {
+      alert("Please enter a positive amount.");
+      return;
+    }
+  
     const updatedTempPayments = {
       ...tempPayments,
-      [participant]: parseFloat(amount) || "",
+      [participant]: parsedAmount || "",
     };
     setTempPayments(updatedTempPayments);
   };
@@ -123,15 +131,43 @@ export default function StatusDebtor() {
   
 
   const handleEditHistory = (participant, index, amount) => {
+    const parsedAmount = parseFloat(amount);
+    
+    // ตรวจสอบให้แน่ใจว่าค่าที่ใส่เป็นบวก
+    if (parsedAmount <= 0) {
+      alert("Please enter a positive amount.");
+      return;
+    }
+  
     const updatedHistory = [...paymentHistory[participant]];
-    updatedHistory[index].amount = parseFloat(amount) || 0; // Update the amount
+    const previousAmount = updatedHistory[index].amount; // เก็บจำนวนเงินเดิมไว้
+    updatedHistory[index].amount = parsedAmount; // อัปเดตจำนวนเงิน
+    
     const newPaymentHistory = {
       ...paymentHistory,
       [participant]: updatedHistory,
     };
     setPaymentHistory(newPaymentHistory);
     localStorage.setItem("paymentHistory", JSON.stringify(newPaymentHistory));
+    
+    // คำนวณยอดรวมใหม่สำหรับ Amount Paid
+    const updatedPayment = (payments[participant] || 0) - previousAmount + parsedAmount;
+    const updatedPayments = {
+      ...payments,
+      [participant]: updatedPayment,
+    };
+    setPayments(updatedPayments);
+    localStorage.setItem("payments", JSON.stringify(updatedPayments));
+  
+    setStatus((prevStatus) => ({
+      ...prevStatus,
+      [participant]:
+        updatedPayments[participant] >= (totalAmounts[participant]?.total || 0)
+          ? "Paid"
+          : "Pending",
+    }));
   };
+  
 
   return (
     <StyledContainer maxWidth="md">
