@@ -256,10 +256,29 @@ const CheckBill = () => {
   const handleAddFoodItem = () => {
     const price = parseFloat(foodPrice);
     const trimmedFoodName = foodName.trim();
+    const selectedParticipantNames = Object.keys(selectedParticipants).filter(
+      (name) => selectedParticipants[name]
+    );
 
     // ตรวจสอบว่าราคาเป็นบวก
     if (isNaN(price) || price <= 0) {
       enqueueSnackbar("Please enter a valid positive price.", {
+        variant: "error",
+      });
+      return;
+    }
+
+    // ตรวจสอบว่าได้กรอก food name
+    if (!trimmedFoodName) {
+      enqueueSnackbar("Please enter a food name.", {
+        variant: "error",
+      });
+      return;
+    }
+
+    // ตรวจสอบว่ามีการเลือก participant อย่างน้อยหนึ่งคน
+    if (selectedParticipantNames.length === 0) {
+      enqueueSnackbar("Please select at least one participant.", {
         variant: "error",
       });
       return;
@@ -281,13 +300,8 @@ const CheckBill = () => {
       id: editingFoodId || uuidv4(), // ใช้ id เดิมถ้ากำลังแก้ไข
       name: trimmedFoodName,
       price: price,
-      participants: Object.keys(selectedParticipants).filter(
-        (name) => selectedParticipants[name]
-      ),
-      splitPrice:
-        Object.keys(selectedParticipants).length > 0
-          ? (price / Object.keys(selectedParticipants).length).toFixed(2)
-          : 0,
+      participants: selectedParticipantNames,
+      splitPrice: (price / selectedParticipantNames.length).toFixed(2),
     };
 
     if (editingFoodId) {
@@ -305,7 +319,6 @@ const CheckBill = () => {
     }
 
     resetFoodInputs(); // รีเซ็ต input หลังจากการเพิ่มหรืออัปเดต
-    
   };
 
   const resetFoodInputs = () => {
@@ -423,7 +436,7 @@ const CheckBill = () => {
               sx={{
                 transition: "0.3s",
                 "&:hover": {
-                  backgroundColor: "#FF4B3A",
+                  backgroundColor: "blue",
                 },
               }}
             >
@@ -438,10 +451,10 @@ const CheckBill = () => {
               label={name}
               sx={{
                 m: 0.5,
-                backgroundColor: "#FF6F61",
+                backgroundColor: "#336699",
                 color: "white",
                 "&:hover": {
-                  backgroundColor: "#FF4B3A",
+                  backgroundColor: "#336699",
                 },
               }}
               onDelete={() => handleRemoveParticipant(index)}
@@ -528,52 +541,50 @@ const CheckBill = () => {
                   onClick={() => handleSelectParticipant(name)}
                   fullWidth
                   sx={{
-                    // เพิ่มสไตล์เมื่อถูกเลือก
-                    backgroundColor: selectedParticipants[name]
-                      ? "#3f51b5"
-                      : "white", // สีน้ำเงินสำหรับปุ่มที่เลือก
-                    color: selectedParticipants[name] ? "white" : "black", // เปลี่ยนสีตัวอักษร
+                    transition: "0.3s",
                     borderColor: selectedParticipants[name]
-                      ? "#3f51b5"
-                      : "#ccc", // เปลี่ยนสีขอบ
+                      ? "purple"
+                      : "rgba(0, 0, 0, 0.12)",
+                    backgroundColor: selectedParticipants[name]
+                      ? "#336699"
+                      : "transparent",
+                    color: selectedParticipants[name]
+                      ? "white"
+                      : "black",
                     "&:hover": {
                       backgroundColor: selectedParticipants[name]
-                        ? "#303f9f"
-                        : "#f5f5f5", // สีพื้นหลังเมื่อโฮเวอร์
-                      borderColor: selectedParticipants[name]
-                        ? "#3f51b5"
-                        : "#bbb", // สีขอบเมื่อโฮเวอร์
+                        ? "#336699"
+                        : "rgba(0, 0, 0, 0.04)",
                     },
                   }}
                 >
-                  {name}
+                 {name}
                 </Button>
               </Grid>
             ))}
           </Grid>
         </Box>
-
         <Button
           variant="contained"
-          color="primary"
+          color="secondary"
           onClick={handleAddFoodItem}
           fullWidth
           sx={{
             mt: 2,
-            transition: "0.3s",
+            backgroundColor: "blue",
             "&:hover": {
-              backgroundColor: "#FF4B3A",
+              backgroundColor: "blue",
             },
           }}
         >
-          Add Food Item
+          {editingFoodId ? "Update Food Item" : "Add Food Item"}
         </Button>
         <Button
           variant="outlined"
-          color="secondary"
+          color="error"
           onClick={handleResetFoodItems}
           fullWidth
-          sx={{ mt: 1 }}
+          sx={{ mt: 2 }}
         >
           Reset All Food Items
         </Button>

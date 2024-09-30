@@ -36,9 +36,8 @@ export default function StatusDebtor() {
   const [status, setStatus] = useState({});
   const [paymentHistory, setPaymentHistory] = useState({});
   const [tempPayments, setTempPayments] = useState({});
-  const [editHistory, setEditHistory] = useState({}); // To store edit values
-
-  const navigate = useNavigate(); // สร้าง navigate สำหรับ redirect
+  const [editHistory, setEditHistory] = useState({});
+  const navigate = useNavigate();
 
   useEffect(() => {
     const storedParticipants =
@@ -63,13 +62,11 @@ export default function StatusDebtor() {
 
   const handlePaymentChange = (participant, amount) => {
     const parsedAmount = parseFloat(amount);
-    
-    // ตรวจสอบให้แน่ใจว่าค่าที่ใส่เป็นบวก
     if (parsedAmount < 0) {
       alert("Please enter a positive amount.");
       return;
     }
-  
+
     const updatedTempPayments = {
       ...tempPayments,
       [participant]: parsedAmount || "",
@@ -80,34 +77,36 @@ export default function StatusDebtor() {
   const handleSubmitPayment = (participant) => {
     const paymentAmount = parseFloat(tempPayments[participant]) || 0;
 
+    // ทำการอัปเดตสถานะการชำระเงิน
     const updatedPayments = {
-      ...payments,
-      [participant]: (payments[participant] || 0) + paymentAmount,
+        ...payments,
+        [participant]: (payments[participant] || 0) + paymentAmount,
     };
     setPayments(updatedPayments);
     localStorage.setItem("payments", JSON.stringify(updatedPayments));
 
     const newPaymentHistory = { ...paymentHistory };
     if (!newPaymentHistory[participant]) {
-      newPaymentHistory[participant] = [];
+        newPaymentHistory[participant] = [];
     }
     newPaymentHistory[participant].push({
-      amount: paymentAmount,
-      date: new Date().toLocaleDateString(),
+        amount: paymentAmount,
+        date: new Date().toLocaleDateString(),
     });
     setPaymentHistory(newPaymentHistory);
     localStorage.setItem("paymentHistory", JSON.stringify(newPaymentHistory));
 
     setStatus((prevStatus) => ({
-      ...prevStatus,
-      [participant]:
-        updatedPayments[participant] >= (totalAmounts[participant]?.total || 0)
-          ? "Paid"
-          : "Pending",
+        ...prevStatus,
+        [participant]:
+            updatedPayments[participant] >= (totalAmounts[participant]?.total || 0)
+                ? "Paid"
+                : "Pending",
     }));
 
-    setTempPayments((prev) => ({ ...prev, [participant]: "" }));
-  };
+    // ทำให้ช่องกรอกเงินว่าง
+    setTempPayments((prev) => ({ ...prev, [participant]: "" })); // ตั้งค่าให้ช่องกรอกเงินเป็นค่าว่าง
+};
 
   const calculateRemaining = (participant) => {
     const totalAmount = totalAmounts[participant]?.total || 0;
@@ -120,37 +119,32 @@ export default function StatusDebtor() {
     setPayments({});
     localStorage.removeItem("payments");
     localStorage.removeItem("paymentHistory");
-  
-    // Reset status to "Pending" for all participants
+
     const resetStatus = {};
     participants.forEach((participant) => {
       resetStatus[participant] = "Pending";
     });
     setStatus(resetStatus);
   };
-  
 
   const handleEditHistory = (participant, index, amount) => {
     const parsedAmount = parseFloat(amount);
-    
-    // ตรวจสอบให้แน่ใจว่าค่าที่ใส่เป็นบวก
     if (parsedAmount <= 0) {
       alert("Please enter a positive amount.");
       return;
     }
-  
+
     const updatedHistory = [...paymentHistory[participant]];
-    const previousAmount = updatedHistory[index].amount; // เก็บจำนวนเงินเดิมไว้
-    updatedHistory[index].amount = parsedAmount; // อัปเดตจำนวนเงิน
-    
+    const previousAmount = updatedHistory[index].amount;
+    updatedHistory[index].amount = parsedAmount;
+
     const newPaymentHistory = {
       ...paymentHistory,
       [participant]: updatedHistory,
     };
     setPaymentHistory(newPaymentHistory);
     localStorage.setItem("paymentHistory", JSON.stringify(newPaymentHistory));
-    
-    // คำนวณยอดรวมใหม่สำหรับ Amount Paid
+
     const updatedPayment = (payments[participant] || 0) - previousAmount + parsedAmount;
     const updatedPayments = {
       ...payments,
@@ -158,7 +152,7 @@ export default function StatusDebtor() {
     };
     setPayments(updatedPayments);
     localStorage.setItem("payments", JSON.stringify(updatedPayments));
-  
+
     setStatus((prevStatus) => ({
       ...prevStatus,
       [participant]:
@@ -167,21 +161,20 @@ export default function StatusDebtor() {
           : "Pending",
     }));
   };
-  
 
   return (
     <StyledContainer maxWidth="md">
-      {participants.length === 0 ? (
+      {participants.length === 0 || Object.keys(totalAmounts).length === 0 ? (
         <div style={{ textAlign: "center" }}>
           <Typography variant="h5" align="center" color="error" gutterBottom>
-            Please fill out the CheckBill information first.
+            Please fill out the Summary information first.
           </Typography>
           <Button
             variant="contained"
             color="primary"
-            onClick={() => navigate("/checkbill")} // Go to CheckBill.js
+            onClick={() => navigate("/summary")} // Go to Summary.js
           >
-            Go to CheckBill
+            Go to Summary
           </Button>
         </div>
       ) : (
@@ -289,17 +282,13 @@ export default function StatusDebtor() {
                     label="Payment"
                     variant="outlined"
                     size="small"
-                    value={tempPayments[participant] || ""}
-                    onChange={(e) =>
-                      handlePaymentChange(participant, e.target.value)
-                    }
+                    onChange={(e) => handlePaymentChange(participant, e.target.value)}
                     sx={{ width: "100%", marginBottom: 1 }}
                   />
                   <Button
                     variant="contained"
                     color="primary"
                     onClick={() => handleSubmitPayment(participant)}
-                    fullWidth
                   >
                     Submit Payment
                   </Button>
