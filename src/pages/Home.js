@@ -44,6 +44,7 @@ export default function Home() {
                 onClick={() => navigateTo(page.toLowerCase())}
                 sx={{
                   backgroundColor: "white",
+                  fontSize: "1rem",
                   color: "black", // Set the text color
                   "&:hover": {
                     backgroundColor: "#f0f0f0", // Hover background color
@@ -88,7 +89,7 @@ export default function Home() {
 
       {/* QR Code Section */}
       <Box sx={{ textAlign: "center", marginTop: 5 }}>
-        <Typography variant="body2" sx={{ marginBottom: 1 }}>
+        <Typography variant="body2" sx={({ marginBottom: 1 }, {})}>
           สนใจสนับสนุนผู้พัฒนา
         </Typography>
         <img

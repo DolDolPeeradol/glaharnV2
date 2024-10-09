@@ -178,6 +178,7 @@ const Summary = () => {
           width: "100%",
           backgroundColor: "#ffffff",
           borderRadius: "8px",
+          // color: "#000000",
         }}
       />
       <Grid container spacing={2} justifyContent="center">
